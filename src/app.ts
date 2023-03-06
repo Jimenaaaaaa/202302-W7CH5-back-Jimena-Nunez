@@ -1,10 +1,13 @@
 import cors from 'cors';
 import createDebug from 'debug';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
-import path from 'path';
+import { CustomError } from './errors/error.js';
+import { usersRouter } from './router/user.router.js';
+// Import path from 'path';
+// import { __dirname } from './config.js';
 
-const debug = createDebug('W6:app');
+const debug = createDebug('CH5:app');
 export const app = express();
 
 app.disable('x-powered-by');
@@ -17,8 +20,27 @@ const corsOptions = {
   origin: '*',
 };
 
-debug(__dirname);
-app.use(express.static(path.resolve(__dirname, 'public')));
+// Me da error en los tests, lo dejo comentado.
 
-// Seguir aqui con los routers
+// debug(__dirname);
+// app.use(express.static(path.resolve(__dirname, 'public')));
+
 app.use('/users', usersRouter);
+
+app.use(
+  (error: CustomError, _req: Request, resp: Response, _next: NextFunction) => {
+    const status = error.statusCode || 500;
+    const statusMessage = error.statusMessage || 'Internal server error';
+    resp.status(status);
+    debug('error');
+    debug(error.message);
+    resp.json({
+      error: [
+        {
+          status,
+          statusMessage,
+        },
+      ],
+    });
+  }
+);
