@@ -1,9 +1,9 @@
 import createDebug from 'debug';
-import { User } from '../entities/user';
-import { HTTPError } from '../errors/error';
-import { Repo } from './repo.interface';
-import { UserModel } from './users.mongo.model';
-const debug = createDebug('W6:repo:users');
+import { User } from '../entities/user.js';
+import { HTTPError } from '../errors/error.js';
+import { Repo } from './repo.interface.js';
+import { UserModel } from './user.mongo.model.js';
+const debug = createDebug('CH5:repo:users');
 
 export class UsersMongoRepo implements Repo<User> {
   private static instance: UsersMongoRepo;
@@ -21,31 +21,46 @@ export class UsersMongoRepo implements Repo<User> {
   }
 
   async query(): Promise<User[]> {
-    const data = await UserModel.find().populate('users', {
-      friends: 0,
-      enemies: 0,
-    });
+    const data = await UserModel.find()
+      .populate('friends', {
+        friends: 0,
+        enemies: 0,
+      })
+      .populate('enemies', {
+        friends: 0,
+        enemies: 0,
+      })
+      .exec();
     return data;
   }
 
   async queryId(id: string): Promise<User> {
-    const data = await UserModel.findById(id).populate('users', {
-      friends: 0,
-      enemies: 0,
-    });
+    const data = await UserModel.findById(id)
+      .populate('friends', {
+        friends: 0,
+        enemies: 0,
+      })
+      .populate('enemies', {
+        friends: 0,
+        enemies: 0,
+      })
+      .exec();
 
     if (!data) throw new HTTPError(404, 'Person not found', 'Id not found');
     return data;
   }
 
   async search(query: { key: string; value: unknown }): Promise<User[]> {
-    const data = await UserModel.find({ [query.key]: query.value }).populate(
-      'users',
-      {
+    const data = await UserModel.find({ [query.key]: query.value })
+      .populate('friends', {
         friends: 0,
         enemies: 0,
-      }
-    );
+      })
+      .populate('enemies', {
+        friends: 0,
+        enemies: 0,
+      })
+      .exec();
     return data;
   }
 
