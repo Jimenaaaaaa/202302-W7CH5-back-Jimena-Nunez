@@ -1,5 +1,4 @@
 import { User } from '../entities/user';
-import { usersRouter } from '../router/user.router';
 import { UserModel } from './user.mongo.model';
 import { UsersMongoRepo } from './user.mongo.repo';
 
@@ -7,18 +6,18 @@ const repo = UsersMongoRepo.getInstance();
 
 jest.mock('./user.mongo.model');
 
-let popValue: unknown;
+let value: unknown;
 
 const mockPopulateExec = () => ({
   populate: jest.fn().mockImplementation(() => ({
     populate: jest.fn().mockImplementation(() => ({
-      exec: jest.fn().mockResolvedValue(popValue),
+      exec: jest.fn().mockResolvedValue(value),
     })),
   })),
 });
 
 const mockExec = () => ({
-  exec: jest.fn().mockResolvedValue(popValue),
+  exec: jest.fn().mockResolvedValue(value),
 });
 
 const mockUsers = [
@@ -40,15 +39,6 @@ const mockUsers = [
   },
 ];
 
-let value: unknown;
-// const mockPopulate = () => ({
-//   populate: jest.fn().mockImplementation(() => ({
-//     populate: jest.fn().mockImplementation(() => ({
-//       exec: jest.fn().mockResolvedValue(value),
-//     })),
-//   })),
-// });
-
 const mockPopulateFunction = (mockPopulateValue: unknown) => ({
   populate: jest.fn().mockImplementation(() => ({
     populate: jest.fn().mockImplementation(() => ({
@@ -64,7 +54,7 @@ describe('Given UserMongoRepo', () => {
 
   describe('When call the Query method', () => {
     test('Then it should return the members array', async () => {
-      popValue = [{}];
+      value = [{}];
       (UserModel.find as jest.Mock).mockImplementation(mockPopulateExec);
       const result = await repo.query();
       expect(result).toEqual([{}]);
@@ -74,7 +64,7 @@ describe('Given UserMongoRepo', () => {
   describe('When call the queryId method', () => {
     describe('When the id returns a user', () => {
       test('Then it should return the user', async () => {
-        popValue = {};
+        value = {};
         (UserModel.findById as jest.Mock).mockImplementation(mockPopulateExec);
         const result = await repo.queryId('1');
         expect(result).toEqual({});
@@ -82,7 +72,7 @@ describe('Given UserMongoRepo', () => {
     });
     describe('When the id not returns a user', () => {
       test('Then it should throw error', async () => {
-        popValue = undefined;
+        value = undefined;
         (UserModel.findById as jest.Mock).mockImplementation(mockPopulateExec);
         const result = repo.queryId('1');
         await expect(result).rejects.toThrow();
@@ -90,17 +80,6 @@ describe('Given UserMongoRepo', () => {
     });
   });
 
-  // describe('When called the search method', () => {
-  //   test('Then it should return the members array', async () => {
-  //     popValue = [{}];
-  //     (UserModel.find as jest.Mock).mockImplementation(mockPopulateExec);
-  //     const result = await repo.search([
-  //       { key: 'Test', value: 'testing' },
-  //       { key: 'Test2', value: 'testing2' },
-  //     ]);
-  //     expect(result).toEqual([{}]);
-  //   });
-  // });
   describe('When call the create method', () => {
     test('Then it should return the created member', async () => {
       (UserModel.create as jest.Mock).mockResolvedValue({});
